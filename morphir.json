@@ -1,0 +1,5 @@
+{
+  "name": "Morphir.Uuidv5.App",
+  "sourceDirectory": "src",
+  "exposedModules": ["Example"]
+}
