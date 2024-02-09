@@ -8,5 +8,9 @@ npm install -g elm
 ```
 
 ```sh
+elm make
+```
+
+```sh
 morphir-elm make
 ```
