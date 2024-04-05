@@ -1,5 +1,10 @@
 module Morphir.Uuidv5.App.Example exposing (..)
-import Result exposing (andThen)
+
+import Result
+import Bitwise
+import Bitwise exposing (shiftRightZfBy)
+import Bitwise exposing (or)
+import Bitwise exposing (shiftLeftBy)
 
 unescape: String -> String
 unescape value =
@@ -15,6 +20,7 @@ percentEncode value =
 
 utf8Escape: String -> String
 utf8Escape value =
+    -- based on http://ecmanaut.blogspot.com/2006/07/encoding-decoding-utf8-in-javascript.html
     percentEncode value
     |> unescape
 
@@ -48,7 +54,36 @@ parseUUID _ =
 sha1: List Int -> List Int
 sha1 _ =
     -- todo implement me
+    -- see http://www.movable-type.co.uk/scripts/sha1.html
     []
+
+rotl: Int -> Int -> Int
+rotl x n =
+    or (shiftLeftBy x n)  (shiftRightZfBy x (32-n))
+
+sha1Hash: String -> String
+sha1Hash input =
+    let
+        -- Based on http://www.movable-type.co.uk/scripts/sha1.html
+        escaped = utf8Escape input
+        -- constants [§4.2.1]
+        constants = [ 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6 ]
+        -- initial hash value [§5.3.1]
+        _ = [ 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0 ]
+        -- PREPROCESSING [§6.1.1]
+        -- add trailing '1' bit (+ 0's padding) to string
+        end = Char.fromCode(0x80) |> String.fromChar
+        message = escaped ++ end
+        -- convert string message into 512-bit/16-integer blocks arrays of ints [§5.2.1]
+        -- length (in 32-bit integers) of message + ‘1’ + appended length
+        length = (String.length message) // 4 + 2
+        -- number of 16-integer-blocks required to hold 'length' ints
+        numberOfBlocks = ceiling (toFloat length / 16)
+        -- todo of size numberOfBlocks
+        _ = List.range 0 (numberOfBlocks - 1)
+    in
+    message
+    -- todo
 
 -- version 0x50 (sha1) or 0x30 (md5)
 
